@@ -1,0 +1,34 @@
+#!/usr/bin/ruby
+
+require 'rubygems'
+require 'classifier'
+require 'csv'
+
+def parse(row)
+  row.each_with_index do |value, index|
+    value = value.to_s
+    data << "#{index}:#{value}" if value != "0"
+  end
+  return data.join(" ")
+end
+
+# Read in training data.
+train_filename, test_filename = *ARGV
+
+# Create classifier.
+b = Classifier::Bayes.new %w(0 1 2 3 4 5 6 7 8 9)
+
+# Read in training file.
+CSV.foreach(train_filename) do |row|
+  row = row.to_a
+  label = row.shift()
+  data = parse(row)
+  b.train(label, data)
+end
+
+# Read in test file.
+CSV.foreach(test_filename) do |row|
+  row = row.to_a
+  data = parse(row)
+  label = b.classify(data)
+end
